@@ -5,12 +5,13 @@ const { registerSchema, loginSchema } = require("../validation");
 const CustomError = require("../utils/CustomError");
 
 const register = async (req, res, next) => {
-  // <-- добавил next
-  const { error } = registerSchema.validate(req.body);
+  // Удаляем confirmPassword перед валидацией
+  const { confirmPassword, ...dataToValidate } = req.body;
+  const { error } = registerSchema.validate(dataToValidate);
   if (error) return next(new CustomError(error.details[0].message, 400)); // передаем ошибку в next
 
   // Извлекаем confirmPassword, но не используем для валидации
-  const { name, email, password, role, confirmPassword } = req.body;
+  const { name, email, password, role } = dataToValidate;
 
   try {
     const existing = await User.findOne({ email });
