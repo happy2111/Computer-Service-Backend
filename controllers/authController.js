@@ -9,7 +9,9 @@ const register = async (req, res, next) => {
   const { error } = registerSchema.validate(req.body);
   if (error) return next(new CustomError(error.details[0].message, 400)); // передаем ошибку в next
 
-  const { name, email, password, role } = req.body;
+  // Извлекаем confirmPassword, но не используем для валидации
+  const { name, email, password, role, confirmPassword } = req.body;
+
   try {
     const existing = await User.findOne({ email });
     if (existing) {
@@ -21,6 +23,7 @@ const register = async (req, res, next) => {
       email,
       password: hashedPassword,
       role,
+      // confirmPassword не сохраняем
     });
 
     const token = jwt.sign(
@@ -59,7 +62,7 @@ const login = async (req, res, next) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }   
+      { expiresIn: "1d" }
     );
 
     res.json({
