@@ -1,6 +1,13 @@
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
+const mongoose = require("mongoose");
+const { createAgent } = require("forest-express-mongoose");
 const dotenv = require("dotenv");
+
+const User = require("./models/User");
+const Contact = require("./models/Contact");
+
 const connectDB = require("./config/db");
 const authMiddleware = require("./middleware/authMiddleware");
 const authorizeRoles = require("./middleware/authorizeRoles");
@@ -10,11 +17,26 @@ dotenv.config();
 connectDB();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/auth", require("./routes/authRoutes"));
+// Forest Admin
+/*const agent = createAgent({
+  authSecret: process.env.FOREST_AUTH_SECRET,
+  envSecret: process.env.FOREST_ENV_SECRET,
+  isProduction: process.env.NODE_ENV === "production",
+  mongoose,
+});
+app.use(agent);*/
 
+// Роуты API
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/user", require("./routes/user"));
+app.use("/api/contact", require("./routes/contact"));
+
+// Пример защищённого маршрута для пользователей с ролью 'user'
 app.get(
   "/api/protected",
   authMiddleware,
@@ -26,11 +48,9 @@ app.get(
   }
 );
 
-app.use("/api/user", require("./routes/user"));
-
-app.use("/api/contact", require("./routes/contact"));
-
+// Обработчик ошибок
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server ${PORT}-portda ishga tushdi`));
+app.listen(PORT, () => {
+  console.log(`Server работает на порту ${PORT}`);
+});

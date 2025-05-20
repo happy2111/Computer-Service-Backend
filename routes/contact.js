@@ -27,7 +27,6 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-// Получить все сообщения (только админ)
 router.get(
   "/",
   authMiddleware,
@@ -42,7 +41,6 @@ router.get(
   }
 );
 
-// Удалить сообщение по ID (только админ)
 router.delete(
   "/:id",
   authMiddleware,
