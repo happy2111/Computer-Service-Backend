@@ -4,7 +4,6 @@ const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/authorizeRoles");
 
-// Получить профиль авторизованного пользователя
 router.get("/profile", authMiddleware, async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -59,5 +58,22 @@ router.get("/me", authMiddleware, async (req, res, next) => {
     next(err);
   }
 });
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  authorizeRoles("admin"),
+  async (req, res, next) => {
+    try {
+      const user = await User.findByIdAndDelete(req.params.id);
+      if (!user) {
+        return res.status(404).json({ msg: "Foydalanuvchi topilmadi" });
+      }
+      res.json({ msg: "Foydalanuvchi o‘chirildi" });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 module.exports = router;
