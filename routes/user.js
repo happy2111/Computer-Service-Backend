@@ -4,7 +4,8 @@ const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/authorizeRoles");
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+// const upload = multer({ dest: "uploads/" });
+const upload = require("../middleware/upload");
 
 router.get("/profile", authMiddleware, async (req, res, next) => {
   try {
