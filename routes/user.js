@@ -14,26 +14,36 @@ router.get("/profile", authMiddleware, async (req, res, next) => {
   }
 });
 
-// Обновить профиль (например, имя)
-router.put("/profile", authMiddleware, async (req, res, next) => {
-  try {
-    const { name } = req.body;
-    if (!name) return res.status(400).json({ msg: "Ism kiritilishi shart" });
+router.put(
+  "/profile",
+  authMiddleware,
+  upload.single("avatar"),
+  async (req, res, next) => {
+    try {
+      const { name } = req.body;
+      const updates = {};
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      { name },
-      { new: true, select: "-password" }
-    );
-    if (!updatedUser)
-      return res.status(404).json({ msg: "Foydalanuvchi topilmadi" });
-    res.json(updatedUser);
-  } catch (err) {
-    next(err);
+      if (name) updates.name = name;
+      if (req.file) {
+        const avatarUrl = `/uploads/${req.file.filename}`;
+        updates.avatar = avatarUrl;
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(req.user.id, updates, {
+        new: true,
+        select: "-password",
+      });
+
+      if (!updatedUser)
+        return res.status(404).json({ msg: "Foydalanuvchi topilmadi" });
+
+      res.json(updatedUser);
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
-// Пример: получить всех пользователей (только для админа)
 router.get(
   "/",
   authMiddleware,
