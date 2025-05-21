@@ -4,6 +4,8 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const { createAgent } = require("forest-express-mongoose");
 const dotenv = require("dotenv");
+const fs = require("fs");
+const path = require("path");
 
 const User = require("./models/User");
 const Contact = require("./models/Contact");
@@ -22,6 +24,12 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Создаём папку uploads, если её нет
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
 // Forest Admin
 /*const agent = createAgent({
   authSecret: process.env.FOREST_AUTH_SECRET,
@@ -37,8 +45,6 @@ app.use("/api/user", require("./routes/user"));
 app.use("/api/contact", require("./routes/contact"));
 app.use("/api/services", require("./routes/services"));
 app.use("/uploads", express.static("uploads"));
-
-
 
 // Пример защищённого маршрута для пользователей с ролью 'user'
 app.get(
