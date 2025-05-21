@@ -3,6 +3,8 @@ const router = express.Router();
 const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/authorizeRoles");
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 
 router.get("/profile", authMiddleware, async (req, res, next) => {
   try {
