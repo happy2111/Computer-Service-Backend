@@ -35,6 +35,9 @@ app.use(agent);*/
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/user", require("./routes/user"));
 app.use("/api/contact", require("./routes/contact"));
+app.use("/api/services", require("./routes/services"));
+
+
 
 // Пример защищённого маршрута для пользователей с ролью 'user'
 app.get(
@@ -52,5 +55,5 @@ app.get(
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`Server работает на порту ${PORT}`);
+  console.log(`Server работает на порту \n\thttp://localhost:${PORT}`);
 });
