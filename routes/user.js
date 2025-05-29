@@ -75,7 +75,7 @@ router.get("/me", authMiddleware, async (req, res, next) => {
 router.delete(
   "/:id",
   authMiddleware,
-  authorizeRoles("admin"),
+  // authorizeRoles("admin"),
   async (req, res, next) => {
     try {
       const user = await User.findByIdAndDelete(req.params.id);
