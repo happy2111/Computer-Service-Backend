@@ -7,7 +7,15 @@ const validator = require("validator");
 
 router.post("/", async (req, res, next) => {
   try {
-    const { name, email, message } = req.body;
+    const { name, email, message, captcha } = req.body;
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+    const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}`;
+    const response = await fetch(verificationUrl, {method: "POST"});
+    const data = await response.json();
+    if (!data.success) {
+      return res.status(400).json({ msg: "Captcha noto‘g‘ri" });
+    }
+
     if (!name || !email || !message) {
       return res
         .status(400)
@@ -18,7 +26,7 @@ router.post("/", async (req, res, next) => {
       return res.status(400).json({ msg: "Email noto‘g‘ri kiritilgan" });
     }
 
-    const contact = new Contact({ name, email, message });
+    const contact = new Contact({ name, email, message , captcha });
     await contact.save();
 
     res.status(201).json({ msg: "Xabar yuborildi" });
