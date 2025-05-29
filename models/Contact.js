@@ -17,6 +17,10 @@ const contactSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  captcha: {
+    type: String,
+    required: true,
+  }
 });
 
 module.exports = mongoose.model("Contact", contactSchema);
