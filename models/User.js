@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     avatar: {
       type: String,
-      default: "../uploads/empty-profile.jpg",
+      default: "/uploads/empty-profile.jpg",  
     },
     role: {
       type: String,
