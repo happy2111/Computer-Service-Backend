@@ -12,6 +12,7 @@ router.post("/", async (req, res, next) => {
     const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}`;
     const response = await fetch(verificationUrl, {method: "POST"});
     const data = await response.json();
+    console.log(data);
     if (!data.success) {
       return res.status(400).json({ msg: "Captcha noto‘g‘ri" });
     }
