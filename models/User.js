@@ -7,8 +7,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     avatar: {
       type: String,
-      default:
-        "https://img.freepik.com/premium-vector/man-empty-avatar-casual-business-style-vector-photo-placeholder-social-networks-resumes_885953-434.jpg",
+      default: "../uploads/empty-profile.jpg",
     },
     role: {
       type: String,
