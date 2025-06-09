@@ -11,6 +11,11 @@ const ServiceRequestSchema = new mongoose.Schema(
     phone: { type: String, required: true },
     preferredDate: { type: Date },
     additionalInfo: { type: String },
+      status: {
+          type: String,
+          enum: ["Pending", "In Progress", "Completed"],
+          default: "Pending",
+      },
   },
   { timestamps: true }
 );
