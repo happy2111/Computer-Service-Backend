@@ -26,7 +26,7 @@ router.get(
   authorizeRoles("admin"),
   async (req, res, next) => {
     try {
-      const messages = await ServiceRequest.find().sort({ createdAt: -1 });
+      const messages = await ServiceRequest.find().sort({createdAt: -1});
       res.json(messages);
     } catch (err) {
       next(err);
@@ -34,7 +34,7 @@ router.get(
   }
 );
 
-router.get("/:id/status", authMiddleware, async (req, res) => {
+router.get("/:requestId/status", authMiddleware, async (req, res) => {
   try {
     const {requestId} = req.params;
     const request = await ServiceRequest.findById(requestId);
@@ -49,7 +49,7 @@ router.get("/:id/status", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/:requestId", authMiddleware, authorizeRoles("admin"), async (req, res) => {
   try {
     const {requestId} = req.params;
     const deletedRequest = await ServiceRequest.findByIdAndDelete(requestId);
@@ -64,12 +64,12 @@ router.delete("/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.put("/:id/status", authMiddleware, authorizeRoles("admin"), async (req, res) => {
+router.put("/:requestId/status", authMiddleware, async (req, res) => {
   try {
     const {requestId} = req.params;
     const {status} = req.body;
 
-    const allowedStatuses = ["Pending", "In Progress", "Completed"];
+    const allowedStatuses = ["pending", "in-progress", "completed"];
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({message: "Invalid status value"});
     }

@@ -50,6 +50,7 @@ app.use("/api/user", require("./routes/user"));
 app.use("/api/contact", require("./routes/contact"));
 app.use("/api/services", require("./routes/services"));
 app.use("/uploads", express.static("uploads"));
+app.use("/api/dashboard", require("./routes/dash"));
 
 // Пример защищённого маршрута для пользователей с ролью 'user'
 app.get(
