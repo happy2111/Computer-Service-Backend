@@ -89,4 +89,40 @@ router.delete(
   }
 );
 
+router.post(
+  "/create-client",
+  authMiddleware,
+  authorizeRoles("admin"),
+  async (req, res, next) => {
+    try {
+      const { name, surname, phone } = req.body;
+      if (!name || !surname || !phone) {
+        return res
+          .status(400)
+          .json({ msg: "Имя, фамилия и телефон обязательны" });
+      }
+      const email = phone + "@applepark.uz";
+      const password = phone;
+      const existing = await User.findOne({ phone });
+      if (existing) {
+        return res
+          .status(400)
+          .json({ msg: "Пользователь с таким телефоном уже существует" });
+      }
+      const bcrypt = require("bcryptjs");
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await User.create({
+        name: name + " " + surname,
+        email,
+        phone,
+        password: hashedPassword,
+        role: "client",
+      });
+      res.status(201).json({ msg: "Клиент создан", user });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 module.exports = router;

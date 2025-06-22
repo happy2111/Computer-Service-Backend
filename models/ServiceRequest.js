@@ -7,7 +7,7 @@ const ServiceRequestSchema = new mongoose.Schema(
     deviceModel: { type: String, required: true },
     issueDescription: { type: String, required: true },
     name: { type: String, required: true },
-    email: { type: String, required: true },
+    // email: { type: String, required: true },
     phone: { type: String, required: true },
     preferredDate: { type: Date },
     additionalInfo: { type: String },
@@ -16,6 +16,9 @@ const ServiceRequestSchema = new mongoose.Schema(
           enum: ["Pending", "In Progress", "Completed"],
           default: "Pending",
       },
+      imei : { type: String },
+      cost : { type: String },
+      master : {type: String}
   },
   { timestamps: true }
 );
