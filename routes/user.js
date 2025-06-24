@@ -64,7 +64,7 @@ router.get(
 // Пример: получить текущего залогиненного пользователя
 router.get("/me", authMiddleware, async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user._id).select("-password");
     if (!user) return res.status(404).json({ msg: "Foydalanuvchi topilmadi" });
     res.json(user);
   } catch (err) {
