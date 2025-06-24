@@ -59,52 +59,47 @@ router.get("/all", authMiddleware, authorizeRoles("admin"), async (req, res) => 
 
 router.get("/:deviceId/status", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const { userId } = req.query;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
     const device = user.device.id(req.params.deviceId);
-
     if (!device) return res.status(404).json({ message: "Device not found" });
-
     res.json({ status: device.status });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-router.put("/:deviceId/status", authMiddleware, async (req, res) => {
+router.put("/:deviceId/status", authMiddleware, authorizeRoles("admin"), async (req, res) => {
   try {
     const allowedStatuses = ["pending", "in-progress", "completed"];
     const { status } = req.body;
-
-
+    const { userId } = req.query;
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
-
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
     const device = user.device.id(req.params.deviceId);
-
     if (!device) return res.status(404).json({ message: "Device not found" });
-
     device.status = status;
     await user.save();
-
     res.json({ message: "Status updated", data: device });
   } catch (error) {
-    res.status(500).json({ error: error.message + status });
+    res.status(500).json({ error: error.message});
   }
 });
 
 
-router.delete("/:deviceId", authMiddleware, async (req, res) => {
+router.delete("/:deviceId", authMiddleware, authorizeRoles("admin"), async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    const device = user.device.id(req.params.deviceId);
-
-    if (!device) return res.status(404).json({ message: "Device not found" });
-
-    device.remove(); // удалить из массива
+    const { userId } = req.query;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    const deviceIndex = user.device.findIndex(d => d._id.toString() === req.params.deviceId);
+    if (deviceIndex === -1) return res.status(404).json({ message: "Device not found" });
+    user.device.splice(deviceIndex, 1);
     await user.save();
-
     res.json({ message: "Device deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });

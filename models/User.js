@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
       enum: ["personal", "business", "admin", "user", "client"],
       default: "personal",
     },
+    phone: { type: String },
     device: {
       type: [DeviceSchema],
       default: []
