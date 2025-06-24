@@ -7,8 +7,8 @@ const DeviceSchema = new mongoose.Schema({
   additionalInfo: { type: String },
   status: {
     type: String,
-    enum: ["Pending", "In Progress", "Completed"],
-    default: "Pending",
+    enum: ["pending", "in-progress", "completed"],
+    default: "pending",
   },
   imei : { type: String , default: undefined },
   cost : { type: Number },
