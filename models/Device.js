@@ -12,6 +12,7 @@ const DeviceSchema = new mongoose.Schema({
   },
   imei : { type: String , default: undefined },
   cost : { type: Number },
+  costOr : { type: Number },
   master : {type: String},
 }, { timestamps: true })
 

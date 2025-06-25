@@ -41,7 +41,7 @@ router.get("", authMiddleware, async (req, res) => {
 
 router.get("/all", authMiddleware, authorizeRoles("admin"), async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find().sort({ createdAt: -1 });
 
     const allDevices = users.flatMap(user =>
       user.device.map(device => ({
@@ -116,6 +116,7 @@ router.post("/add", authMiddleware, authorizeRoles("admin"), async (req, res) =>
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+    // deviceData.cost = `${deviceData.cost} / ${deviceData.costOr}`
     user.device.push(deviceData);
     await user.save();
     res.status(201).json({
