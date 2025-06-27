@@ -32,7 +32,7 @@ router.put(
         updates.avatar = avatarUrl;
       }
 
-      const updatedUser = await User.findByIdAndUpdate(req.user.id, updates, {
+      const updatedUser = await User.findByIdAndUpdate(req.user._id, updates, {
         new: true,
         select: "-password",
       });
