@@ -52,7 +52,7 @@ router.post("/masters", authMiddleware, authorizeRoles("admin"), async (req, res
 })
 
 // Статистика по мастерам: сколько устройств привязано к каждому
-router.get("/masters/stats",  async (req, res, next) => {
+router.get("/masters/stats", authMiddleware, authorizeRoles("admin"), async (req, res, next) => {
   try {
     // Получаем всех мастеров
     const masters = await Masters.find();
