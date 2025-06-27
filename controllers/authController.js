@@ -10,7 +10,6 @@ const register = async (req, res, next) => {
   const { error } = registerSchema.validate(dataToValidate);
   if (error) return next(new CustomError(error.details[0].message, 400)); // передаем ошибку в next
 
-  // Извлекаем confirmPassword, но не используем для валидации
   const { name, email, password, role } = dataToValidate;
 
   try {
@@ -24,7 +23,6 @@ const register = async (req, res, next) => {
       email,
       password: hashedPassword,
       role,
-      // confirmPassword не сохраняем
     });
 
     const token = jwt.sign(
@@ -79,5 +77,6 @@ const login = async (req, res, next) => {
     next(err);
   }
 };
+
 
 module.exports = { register, login };
