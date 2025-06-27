@@ -23,7 +23,7 @@ router.put(
   upload.single("avatar"),
   async (req, res, next) => {
     try {
-      const { name } = req.body;
+      const { name, removeAvatar } = req.body;
       const updates = {};
 
       if (name) updates.name = name;
@@ -31,7 +31,9 @@ router.put(
         const avatarUrl = `/uploads/${req.file.filename}`;
         updates.avatar = avatarUrl;
       }
-
+      if (removeAvatar) {
+        updates.avatar = "/uploads/empty-profile.jpg";
+      }
       const updatedUser = await User.findByIdAndUpdate(req.user._id, updates, {
         new: true,
         select: "-password",
