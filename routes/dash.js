@@ -14,7 +14,6 @@ router.get('/stats', authMiddleware, authorizeRoles("admin"), async (req, res) =
     const totalMessages = await ContactMessage.countDocuments();
     const totalRequests = await ServiceRequest.countDocuments();
     const rating = 4.9; // Статичное значение
-
     res.json({
       totalUsers,
       totalMessages,
@@ -54,11 +53,8 @@ router.post("/masters", authMiddleware, authorizeRoles("admin"), async (req, res
 // Статистика по мастерам: сколько устройств привязано к каждому
 router.get("/masters/stats", authMiddleware, authorizeRoles("admin"), async (req, res, next) => {
   try {
-    // Получаем всех мастеров
     const masters = await Masters.find();
-    // Агрегируем устройства по мастерам
     const users = await User.find({}, { device: 1 });
-    // Считаем количество устройств для каждого мастера
     const masterStats = masters.map(master => {
       let count = 0;
       users.forEach(user => {
