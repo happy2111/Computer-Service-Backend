@@ -7,13 +7,15 @@ const DeviceSchema = new mongoose.Schema({
   additionalInfo: { type: String },
   status: {
     type: String,
-    enum: ["pending", "in-progress", "completed"],
+    enum: ["pending", "in-progress", "completed", "unrepairable"],
     default: "pending",
   },
   imei : { type: String , default: undefined },
   cost : { type: Number },
   costOr : { type: Number },
   master : {type: String},
+  statusComment: { type: String, default: "" },
+  packedUp: { type: Boolean, default: false },
 }, { timestamps: true })
 
 module.exports = DeviceSchema;
