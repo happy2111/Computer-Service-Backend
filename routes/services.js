@@ -13,7 +13,7 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(404).json({message: "User not found"});
     }
 
-    user.device.push(req.body); // добавляем устройство в массив
+    user.device.push(req.body);
     await user.save();
 
     res.status(201).json({
@@ -33,7 +33,7 @@ router.get("", authMiddleware, async (req, res) => {
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.json(user.device); // весь массив устройств
+    res.json(user.device);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
