@@ -98,10 +98,10 @@ router.post(
   async (req, res, next) => {
     try {
       const { name, surname, phone } = req.body;
-      if (!name || !surname || !phone) {
+      if (!name || !phone) {
         return res
           .status(400)
-          .json({ msg: "Имя, фамилия и телефон обязательны" });
+          .json({ msg: "Имя и телефон обязательны" });
       }
       const email = phone + "@applepark.uz";
       const password = phone;
