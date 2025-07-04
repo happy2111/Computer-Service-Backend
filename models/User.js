@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const DeviceSchema = require("./Device")
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -7,13 +7,18 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     avatar: {
       type: String,
-      default: "/uploads/empty-profile.jpg",  
+      default: "/uploads/empty-profile.jpg",
     },
     role: {
       type: String,
-      enum: ["personal", "business", "admin", "user"],
+      enum: ["personal", "business", "admin", "user", "client"],
       default: "personal",
     },
+    phone: { type: String },
+    device: {
+      type: [DeviceSchema],
+      default: []
+    }
   },
   { timestamps: true }
 );
