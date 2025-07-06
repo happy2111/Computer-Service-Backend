@@ -9,9 +9,8 @@ const registerSchema = Joi.object({
 });
 
 const loginSchema = Joi.object({
-  email: Joi.string().email(),
-  phone: Joi.string().pattern(/^\+?[0-9]{10,15}$/),
+  login: Joi.string().required(),
   password: Joi.string().required(),
-}).or('email', 'phone'); // Требует хотя бы одно из полей
+});
 
 module.exports = { registerSchema, loginSchema };

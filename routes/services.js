@@ -90,7 +90,7 @@ router.put("/:deviceId/status", authMiddleware, authorizeRoles("admin"), async (
   }
 });
 
-router.put("/:deviceId/picked",  async (req, res) => {
+router.put("/:deviceId/picked", authMiddleware, authorizeRoles("admin"), async (req, res) => {
   try {
     const { status } = req.body;
     const { userId } = req.query;
@@ -109,6 +109,26 @@ router.put("/:deviceId/picked",  async (req, res) => {
   }
 })
 
+router.patch("/:deviceId", authMiddleware, authorizeRoles("admin"), async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const updates = req.body;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const device = user.device.id(req.params.deviceId);
+    if (!device) return res.status(404).json({ message: "Device not found" });
+
+    Object.keys(updates).forEach(key => {
+      device[key] = updates[key];
+    });
+
+    await user.save();
+    res.json({ message: "Device updated successfully", data: device });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 router.delete("/:deviceId", authMiddleware, authorizeRoles("admin"), async (req, res) => {
   try {
     const { userId } = req.query;
