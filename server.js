@@ -9,6 +9,7 @@ const path = require("path");
 
 const User = require("./models/User");
 const Contact = require("./models/Contact");
+const { router: pushNotificationsRouter } = require('./routes/pushNotifications');
 
 const connectDB = require("./config/db");
 const authMiddleware = require("./middleware/authMiddleware");
@@ -22,7 +23,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 // app.use(cors())
 app.use(cors({
-  origin:  ['http://localhost:5173',"https://servicehy.netlify.app", "https://www.applepark.uz", "https://applepark.uz"],
+  origin:  ['http://localhost:5173',"http://192.168.1.148:5173","https://servicehy.netlify.app", "https://www.applepark.uz", "https://applepark.uz"],
   methods: ['GET', 'POST', 'PUT','PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -51,6 +52,7 @@ app.use("/api/contact", require("./routes/contact"));
 app.use("/api/services", require("./routes/services"));
 app.use("/uploads", express.static("uploads"));
 app.use("/api/dashboard", require("./routes/dash"));
+app.use('/api/push', pushNotificationsRouter);
 
 // Пример защищённого маршрута для пользователей с ролью 'user'
 app.get(

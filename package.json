@@ -128,6 +128,7 @@
     "unpipe": "^1.0.0",
     "validator": "^13.15.0",
     "vary": "^1.1.2",
+    "web-push": "^3.6.7",
     "webidl-conversions": "^7.0.0",
     "whatwg-url": "^14.2.0",
     "wrappy": "^1.0.2"
