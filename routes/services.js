@@ -4,6 +4,7 @@ const ServiceRequest = require("../models/ServiceRequest");
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/authorizeRoles");
 const User = require("../models/User");
+const { sendPushNotifications } = require("./pushNotifications");
 
 
 router.post("/", authMiddleware, async (req, res) => {
@@ -157,6 +158,12 @@ router.post("/add", authMiddleware, authorizeRoles("admin"), async (req, res) =>
     // deviceData.cost = `${deviceData.cost} / ${deviceData.costOr}`
     user.device.push(deviceData);
     await user.save();
+
+    await sendPushNotifications({
+      title: 'Добавлен новый сервис',
+      body: 'Проверьте заявки'
+    });
+
     res.status(201).json({
       message: "Device added successfully to user",
       data: user.device[user.device.length - 1],
