@@ -159,10 +159,10 @@ router.post("/add", authMiddleware, authorizeRoles("admin"), async (req, res) =>
     user.device.push(deviceData);
     await user.save();
 
-    await sendPushNotifications({
-      title: 'Добавлен новый сервис',
-      body: 'Проверьте заявки'
-    });
+    // await sendPushNotifications({
+    //   title: 'Добавлен новый сервис',
+    //   body: 'Проверьте заявки'
+    // });
 
     res.status(201).json({
       message: "Device added successfully to user",
