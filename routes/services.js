@@ -5,6 +5,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/authorizeRoles");
 const User = require("../models/User");
 const { sendPushNotifications } = require("./pushNotifications");
+const {sendTelegramMessage, formatDeviceStatus, formatMessage} = require("../utils/telegram");
 
 
 router.post("/", authMiddleware, async (req, res) => {
@@ -16,6 +17,9 @@ router.post("/", authMiddleware, async (req, res) => {
 
     user.device.push(req.body);
     await user.save();
+
+    const message = await formatMessage(deviceData, user.name, "📱 *Yangi qurilma qo'shildi!*");
+    await sendTelegramMessage(message);
 
     res.status(201).json({
       message: "Device added successfully",
@@ -85,6 +89,8 @@ router.put("/:deviceId/status", authMiddleware, authorizeRoles("admin"), async (
     if (!device) return res.status(404).json({ message: "Device not found" });
     device.status = status;
     await user.save();
+    const message = await formatMessage(device, user.name, "✏️ *Xolat yangilandi Yangilandi!*");
+    await sendTelegramMessage(message);
     res.json({ message: "Status updated", data: device });
   } catch (error) {
     res.status(500).json({ error: error.message});
@@ -103,6 +109,12 @@ router.put("/:deviceId/picked", authMiddleware, authorizeRoles("admin"), async (
 
     device.packedUp = status
     await user.save()
+
+    const message = await formatMessage(device, user.name, "✏️ *Xolat yangilandi Yangilandi!*");
+    await sendTelegramMessage(message);
+
+
+
     res.json({ message: "Picked Status updated", data: device });
   }
   catch (error) {
@@ -125,6 +137,8 @@ router.patch("/:deviceId", authMiddleware, authorizeRoles("admin"), async (req, 
     });
 
     await user.save();
+    const message = await formatMessage(device, user.name, "✏️ *Xolat yangilandi Yangilandi!*");
+    await sendTelegramMessage(message);
     res.json({ message: "Device updated successfully", data: device });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -163,6 +177,9 @@ router.post("/add", authMiddleware, authorizeRoles("admin"), async (req, res) =>
     //   title: 'Добавлен новый сервис',
     //   body: 'Проверьте заявки'
     // });
+    const message = await formatMessage(deviceData, user.name, "📱 *Yangi qurilma qo'shildi!*");
+    await sendTelegramMessage(message);
+
 
     res.status(201).json({
       message: "Device added successfully to user",
