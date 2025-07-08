@@ -4,6 +4,7 @@ const Contact = require("../models/Contact");
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/authorizeRoles");
 const validator = require("validator");
+const sendTelegramMessage = require("../utils/telegram");
 
 router.post("/", async (req, res, next) => {
   try {
@@ -29,6 +30,8 @@ router.post("/", async (req, res, next) => {
 
     const contact = new Contact({ name, email, message , captcha });
     await contact.save();
+    await sendTelegramMessage(`📨 Новое сообщение!\nОт: ${name}\nEmail: ${email}\nСообщение: ${message}`);
+
 
     res.status(201).json({ msg: "Xabar yuborildi" });
   } catch (err) {
