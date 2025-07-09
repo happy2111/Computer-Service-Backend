@@ -32,7 +32,7 @@ router.put(
         updates.avatar = avatarUrl;
       }
       if (removeAvatar) {
-        updates.avatar = "/uploads/empty-profile.jpg";
+        updates.avatar = "/public/empty-profile.jpg";
       }
       const updatedUser = await User.findByIdAndUpdate(req.user._id, updates, {
         new: true,
