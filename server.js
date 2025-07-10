@@ -46,6 +46,8 @@ if (!fs.existsSync(uploadsDir)) {
 app.use(agent);*/
 
 // Роуты API
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/user", require("./routes/user"));
 app.use("/api/contact", require("./routes/contact"));
@@ -54,6 +56,8 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/dashboard", require("./routes/dash"));
 app.use('/api/push', pushNotificationsRouter);
 app.use('/public', express.static(path.join(__dirname, 'public')));
+
+
 
 
 // Пример защищённого маршрута для пользователей с ролью 'user'

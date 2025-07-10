@@ -17,6 +17,9 @@ function authMiddleware(req, res, next) {
     req.user = { _id: decoded.id, role: decoded.role };
     next();
   } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ msg: "Токен истёк" });
+    }
     return res.status(401).json({ msg: "Неверный токен" });
   }
 }
