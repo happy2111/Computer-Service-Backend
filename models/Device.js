@@ -14,7 +14,10 @@ const DeviceSchema = new mongoose.Schema({
   imei : { type: String , default: undefined },
   cost : { type: Number },
   costOr : { type: Number },
-  master : {type: String},
+  master: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
   statusComment: { type: String, default: "" },
   packedUp: { type: Boolean, default: false },
 }, { timestamps: true })

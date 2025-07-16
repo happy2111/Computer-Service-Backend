@@ -6,6 +6,7 @@ const authorizeRoles = require("../middleware/authorizeRoles");
 const User = require("../models/User");
 const { sendPushNotifications } = require("./pushNotifications");
 const {sendTelegramMessage, formatDeviceStatus, formatMessage} = require("../utils/telegram");
+const mongoose = require("mongoose");
 
 
 router.post("/", authMiddleware, async (req, res) => {
@@ -44,19 +45,43 @@ router.get("", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/all", authMiddleware, authorizeRoles("admin"), async (req, res) => {
+router.get("/all", authMiddleware, authorizeRoles("admin", "master") , async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
 
-    const allDevices = users.flatMap(user =>
-      user.device.map(device => ({
-        userId: user._id,
-        userName: user.name,
-        ...device.toObject() // если не сделать, то будут методы Mongoose-сабдокумента
-      }))
-    );
+    const role = req.user.role;
 
-    res.json(allDevices);
+    const userIdOfMaster = req.user._id;
+
+    if (role === "admin") {
+      const allDevices = users.flatMap(user =>
+        user.device.map(device => ({
+          userId: user._id,
+          userName: user.name,
+          ...device.toObject() // если не сделать, то будут методы Mongoose-сабдокумента
+        }))
+      );
+      res.json(allDevices);
+    }
+
+    if (role === "master") {
+      const ownDevices = users.flatMap(user =>
+        user.device
+          .filter(device => device.master?.toString() === userIdOfMaster.toString())
+          .map(device => ({
+            userId: user._id,
+            userName: user.name,
+            masterName: "John",
+            ...device.toObject(),
+          }))
+      );
+      return res.json(ownDevices);
+    }
+
+
+    return res.status(403).json({ msg: "Доступ запрещён" });
+
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -75,7 +100,7 @@ router.get("/:deviceId/status", authMiddleware, async (req, res) => {
   }
 });
 
-router.put("/:deviceId/status", authMiddleware, authorizeRoles("admin"), async (req, res) => {
+router.put("/:deviceId/status", authMiddleware, authorizeRoles("admin", "master"), async (req, res) => {
   try {
     const allowedStatuses = ["pending", "in-progress", "completed", "unrepairable"];
     const { status } = req.body;
@@ -97,7 +122,7 @@ router.put("/:deviceId/status", authMiddleware, authorizeRoles("admin"), async (
   }
 });
 
-router.put("/:deviceId/picked", authMiddleware, authorizeRoles("admin"), async (req, res) => {
+router.put("/:deviceId/picked", authMiddleware, authorizeRoles("admin", "master"),  async (req, res) => {
   try {
     const { status } = req.body;
     const { userId } = req.query;
@@ -122,7 +147,7 @@ router.put("/:deviceId/picked", authMiddleware, authorizeRoles("admin"), async (
   }
 })
 
-router.patch("/:deviceId", authMiddleware, authorizeRoles("admin"), async (req, res) => {
+router.patch("/:deviceId", authMiddleware, authorizeRoles("admin", "master"), async (req, res) => {
   try {
     const { userId } = req.query;
     const updates = req.body;
@@ -144,6 +169,7 @@ router.patch("/:deviceId", authMiddleware, authorizeRoles("admin"), async (req, 
     res.status(500).json({ error: error.message });
   }
 });
+
 router.delete("/:deviceId", authMiddleware, authorizeRoles("admin"), async (req, res) => {
   try {
     const { userId } = req.query;
@@ -159,7 +185,7 @@ router.delete("/:deviceId", authMiddleware, authorizeRoles("admin"), async (req,
   }
 });
 
-router.post("/add", authMiddleware, authorizeRoles("admin"), async (req, res) => {
+router.post("/add", authMiddleware, authorizeRoles("admin", "master"), async (req, res) => {
   try {
     const { userId, ...deviceData } = req.body;
     if (!userId) {
@@ -169,7 +195,12 @@ router.post("/add", authMiddleware, authorizeRoles("admin"), async (req, res) =>
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    // deviceData.cost = `${deviceData.cost} / ${deviceData.costOr}`
+
+    if (!deviceData.master || !mongoose.Types.ObjectId.isValid(deviceData.master)) {
+      return res.status(400).json({ msg: "Некорректный или отсутствующий ID мастера" });
+    }
+
+
     user.device.push(deviceData);
     await user.save();
 
@@ -192,94 +223,4 @@ router.post("/add", authMiddleware, authorizeRoles("admin"), async (req, res) =>
 });
 
 
-
-
-
-// router.post("/", authMiddleware, async (req, res) => {
-//   try {
-//     const newRequest = new ServiceRequest(req.body);
-//     await newRequest.save();
-//     res
-//       .status(201)
-//       .json({
-//         message: "Service request created successfully",
-//         data: newRequest,
-//       });
-//   } catch (error) {
-//     res.status(400).json({error: error.message});
-//   }
-// });
-
-// router.get(
-//   "/",
-//   authMiddleware,
-//   authorizeRoles("admin"),
-//   async (req, res, next) => {
-//     try {
-//       const messages = await ServiceRequest.find().sort({createdAt: -1});
-//       res.json(messages);
-//     } catch (err) {
-//       next(err);
-//     }
-//   }
-// );
-//
-// router.get("/:requestId/status", authMiddleware, async (req, res) => {
-//   try {
-//     const {requestId} = req.params;
-//     const request = await ServiceRequest.findById(requestId);
-//
-//     if (!request) {
-//       return res.status(404).json({message: "Request not found"});
-//     }
-//
-//     res.json({status: request.status}); // например: "Pending"
-//   } catch (error) {
-//     res.status(500).json({error: error.message});
-//   }
-// });
-//
-// router.delete("/:requestId", authMiddleware, authorizeRoles("admin"), async (req, res) => {
-//   try {
-//     const {requestId} = req.params;
-//     const deletedRequest = await ServiceRequest.findByIdAndDelete(requestId);
-//
-//     if (!deletedRequest) {
-//       return res.status(404).json({message: "Request not found"});
-//     }
-//
-//     res.json({message: "Service request deleted successfully"});
-//   } catch (error) {
-//     res.status(500).json({error: error.message});
-//   }
-// });
-//
-// router.put("/:requestId/status/test", authMiddleware, async (req, res) => {
-//   try {
-//     const {requestId} = req.params;
-//     const {status} = req.body;
-//
-//     const allowedStatuses = ["pending", "in-progress", "completed"];
-//     if (!allowedStatuses.includes(status)) {
-//       return res.status(400).json({message: "Invalid status value"});
-//     }
-//
-//     const updatedRequest = await User.findByIdAndUpdate(
-//       requestId,
-//       {status},
-//       {new: true}
-//     );
-//
-//     if (!updatedRequest) {
-//       return res.status(404).json({message: "Request not found"});
-//     }
-//
-//     res.json({
-//       message: "Status updated successfully",
-//       data: updatedRequest,
-//     });
-//   } catch (error) {
-//     res.status(500).json({error: error.message});
-//   }
-// });
 module.exports = router;

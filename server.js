@@ -56,8 +56,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/dashboard", require("./routes/dash"));
 app.use('/api/push', pushNotificationsRouter);
 app.use('/public', express.static(path.join(__dirname, 'public')));
-
-
+app.use("/api/masters", require("./routes/masters"));
 
 
 // Пример защищённого маршрута для пользователей с ролью 'user'

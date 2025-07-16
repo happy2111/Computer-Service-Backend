@@ -13,6 +13,14 @@ const masterSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  description: {
+    type: String,
+    default: "",
+  },
+  avatar: {
+    type: String,
+    default: "/public/empty-profile.jpg",
+  },
 });
 
 module.exports = mongoose.model("Masters", masterSchema);

@@ -42,7 +42,7 @@ router.post("/", async (req, res, next) => {
 router.get(
   "/",
   authMiddleware,
-  authorizeRoles("admin"),
+  authorizeRoles("admin", "master"),
   async (req, res, next) => {
     try {
       const messages = await Contact.find().sort({ createdAt: -1 });

@@ -10,9 +10,14 @@ const login = async (req, res, next) => {
   const { error } = loginSchema.validate(req.body);
   if (error) return next(new CustomError(error.details[0].message, 400));
 
-  const { email, phone, password } = req.body;
+  const { login, password } = req.body;
+
   try {
-    const user = await User.findOne(email ? { email } : { phone });
+    // Ищем пользователя по email или телефону
+    const user = await User.findOne({
+      $or: [{ email: login }, { phone: login }]
+    });
+
     if (!user) return next(new CustomError("Foydalanuvchi topilmadi", 400));
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -26,7 +31,7 @@ const login = async (req, res, next) => {
         httpOnly: true,
         secure: true,
         sameSite: "Strict",
-        maxAge: 14 * 24 * 60 * 60 * 1000, // 7 days
+        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 kun
       })
       .json({
         token: accessToken,
@@ -42,6 +47,7 @@ const login = async (req, res, next) => {
     next(err);
   }
 };
+
 
 const register = async (req, res, next) => {
   const { confirmPassword, ...dataToValidate } = req.body;

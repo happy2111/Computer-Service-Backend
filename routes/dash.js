@@ -8,7 +8,7 @@ const ServiceRequest = require('../models/ServiceRequest');
 const Masters = require('../models/Masters');
 
 // GET /dashboard/stats
-router.get('/stats', authMiddleware, authorizeRoles("admin"), async (req, res) => {
+router.get('/stats', authMiddleware, authorizeRoles("admin", "master"), async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalMessages = await ContactMessage.countDocuments();
@@ -36,7 +36,7 @@ router.get("/masters", authMiddleware, authorizeRoles("admin"), async (req, res,
   }
 })
 
-router.post("/masters", authMiddleware, authorizeRoles("admin"), async (req, res, next) => {
+router.post("/masters", authMiddleware, authorizeRoles("admin", "master"), async (req, res, next) => {
   try {
     const { name, phone } = req.body;
     if (!name || !phone) {
@@ -51,7 +51,7 @@ router.post("/masters", authMiddleware, authorizeRoles("admin"), async (req, res
 })
 
 // Статистика по мастерам: сколько устройств привязано к каждому
-router.get("/masters/stats", authMiddleware, authorizeRoles("admin"), async (req, res, next) => {
+router.get("/masters/stats", authMiddleware, authorizeRoles("admin", "master"), async (req, res, next) => {
   try {
     const masters = await Masters.find();
     const users = await User.find({}, { device: 1 });
@@ -65,7 +65,8 @@ router.get("/masters/stats", authMiddleware, authorizeRoles("admin"), async (req
       return {
         master: master.name,
         phone: master.phone,
-        deviceCount: count
+        deviceCount: count,
+
       };
     });
     res.json(masterStats);
