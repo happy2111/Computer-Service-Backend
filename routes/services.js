@@ -152,7 +152,7 @@ router.patch("/:deviceId", authMiddleware, authorizeRoles("admin", "master"), as
     const { userId } = req.query;
     const updates = req.body;
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
+      if (!user) return res.status(404).json({ message: "User not found" });
 
     const device = user.device.id(req.params.deviceId);
     if (!device) return res.status(404).json({ message: "Device not found" });

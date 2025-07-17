@@ -6,6 +6,7 @@ const authorizeRoles = require("../middleware/authorizeRoles");
 const multer = require("multer");
 // const upload = multer({ dest: "uploads/" });
 const upload = require("../middleware/upload");
+const bcrypt = require("bcryptjs");
 
 router.get("/profile", authMiddleware, async (req, res, next) => {
   try {
@@ -48,6 +49,37 @@ router.put(
     }
   }
 );
+
+// PUT /api/auth/change-password
+router.put("/change-password", authMiddleware, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ msg: "Все поля обязательны" });
+  }
+
+  try {
+    const user = await User.findById(req.user._id).select("+password");
+
+    if (!user) {
+      return res.status(404).json({ msg: "Пользователь не найден" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: "Неверный текущий пароль" });
+    }
+
+    // Хешируем новый пароль
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    await user.save();
+    res.json({ msg: "Пароль успешно обновлён" });
+  } catch (err) {
+    res.status(500).json({ msg: "Ошибка сервера", error: err.message });
+  }
+});
 
 router.get(
   "/",

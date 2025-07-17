@@ -16,7 +16,7 @@ const login = async (req, res, next) => {
     // Ищем пользователя по email или телефону
     const user = await User.findOne({
       $or: [{ email: login }, { phone: login }]
-    });
+    }).select("+password");
 
     if (!user) return next(new CustomError("Foydalanuvchi topilmadi", 400));
 
