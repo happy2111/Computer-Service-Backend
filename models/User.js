@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "/public/empty-profile.jpg",
     },
+    description: { type: String, default: "" },
+    position: { type: String, default: "" },
     role: {
       type: String,
       enum: ["personal", "master", "admin", "user", "client"],

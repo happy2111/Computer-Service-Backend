@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const ServiceRequest = require("../models/ServiceRequest");
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/authorizeRoles");
 const User = require("../models/User");
@@ -19,12 +18,11 @@ router.post("/", authMiddleware, async (req, res) => {
     user.device.push(req.body);
     await user.save();
 
-    const message = await formatMessage(deviceData, user.name, "📱 *Yangi qurilma qo'shildi!*");
+    const message = await formatMessage(req.body, user.name, "📱 *Yangi qurilma qo'shildi!*");
     await sendTelegramMessage(message);
 
     res.status(201).json({
       message: "Device added successfully",
-      // data: user.device[user.device.length - 1],
       data: user
     });
 
@@ -61,7 +59,7 @@ router.get("/all", authMiddleware, authorizeRoles("admin", "master") , async (re
           ...device.toObject() // если не сделать, то будут методы Mongoose-сабдокумента
         }))
       );
-      res.json(allDevices);
+      return res.json(allDevices);
     }
 
     if (role === "master") {
@@ -71,7 +69,6 @@ router.get("/all", authMiddleware, authorizeRoles("admin", "master") , async (re
           .map(device => ({
             userId: user._id,
             userName: user.name,
-            masterName: "John",
             ...device.toObject(),
           }))
       );
@@ -160,6 +157,10 @@ router.patch("/:deviceId", authMiddleware, authorizeRoles("admin", "master"), as
     Object.keys(updates).forEach(key => {
       device[key] = updates[key];
     });
+    if (updates.master) {
+      const master = await User.findById(device.master);
+      device.masterName = master ? master.name : "Unknown Master";
+    }
 
     await user.save();
     const message = await formatMessage(device, user.name, "✏️ *Xolat yangilandi Yangilandi!*");
@@ -196,10 +197,13 @@ router.post("/add", authMiddleware, authorizeRoles("admin", "master"), async (re
       return res.status(404).json({ message: "User not found" });
     }
 
+
+
     if (!deviceData.master || !mongoose.Types.ObjectId.isValid(deviceData.master)) {
       return res.status(400).json({ msg: "Некорректный или отсутствующий ID мастера" });
     }
-
+    const master = await User.findById(deviceData.master);
+    deviceData.masterName = master ? master.name : "Unknown Master";
 
     user.device.push(deviceData);
     await user.save();

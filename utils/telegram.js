@@ -40,11 +40,13 @@ async function formatMessage(device, userName, heading ) {
   const status = await formatDeviceStatus(device.status);
   const cost = device.cost ? `\n💰 Narxi: ${device.cost} so'm` : '' ;
   const costOr = device.costOr ? `\n💰 Taxminiy narxi: ${device.costOr} so'm` : '';
-  const master = device.master ? `\n👨‍🔧 Javobgar Shaxs: ${device.master}` : '';
+  const master = device.masterName ? `\n👨‍🔧 Javobgar Shaxs: ${device.masterName}` : '';
   const imei = device.imei ? `\nIMEI: ${device.imei}` : '';
   const comment = device.statusComment ? `\n💬 Izoh: ${device.statusComment}` : '';
 
-  return `${heading}
+  return `
+(#${device.orderNumber || 'N/A'})
+${heading}
 
 👤 Mijoz: ${userName}
 📞 Telefon: ${device.phone}

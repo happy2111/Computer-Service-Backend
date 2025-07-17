@@ -18,17 +18,17 @@ const DeviceSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  masterName: { type: String, default: "" },
   statusComment: { type: String, default: "" },
   packedUp: { type: Boolean, default: false },
 }, { timestamps: true })
 
-// Статический метод для получения следующего номера
 DeviceSchema.statics.getNextOrderNumber = async function() {
   try {
     const User = mongoose.model('User');
     const users = await User.find({});
 
-    let maxNumber = 0;
+    let maxNumber = 999; // начальное значение 999, чтобы следующий был 1000
     users.forEach(user => {
       if (user.device && Array.isArray(user.device)) {
         user.device.forEach(device => {
@@ -46,14 +46,13 @@ DeviceSchema.statics.getNextOrderNumber = async function() {
   }
 };
 
-// Middleware перед сохранением
 DeviceSchema.pre('save', async function(next) {
   try {
     if (this.isNew && !this.orderNumber) {
       const User = mongoose.model('User');
       const users = await User.find({});
 
-      let maxNumber = 0;
+      let maxNumber = 999; // начальное значение 999
       users.forEach(user => {
         if (user.device && Array.isArray(user.device)) {
           user.device.forEach(device => {

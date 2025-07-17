@@ -24,10 +24,12 @@ router.put(
   upload.single("avatar"),
   async (req, res, next) => {
     try {
-      const {name, removeAvatar} = req.body;
+      const {name,description, position, removeAvatar} = req.body;
       const updates = {};
 
       if (name) updates.name = name;
+      if (description) updates.description = description;
+      if (position) updates.position = position;
       if (req.file) {
         const avatarUrl = `/uploads/${req.file.filename}`;
         updates.avatar = avatarUrl;
