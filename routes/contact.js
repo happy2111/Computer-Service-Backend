@@ -30,7 +30,7 @@ router.post("/", async (req, res, next) => {
 
     const contact = new Contact({ name, email, message , captcha });
     await contact.save();
-    await sendTelegramMessage(`📨 Новое сообщение!\nОт: ${name}\nEmail: ${email}\nСообщение: ${message}`);
+    // await sendTelegramMessage(`📨 Новое сообщение!\nОт: ${name}\nEmail: ${email}\nСообщение: ${message}`);
 
 
     res.status(201).json({ msg: "Xabar yuborildi" });

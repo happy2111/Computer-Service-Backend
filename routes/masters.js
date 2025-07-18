@@ -7,7 +7,7 @@ const fs = require("fs")
 const User = require("../models/User");
 const mongoose = require("mongoose");
 
-router.get("/all", authMiddleware, async (req, res, next) => {
+router.get("/all", async (req, res, next) => {
   try {
     const masters = await User.find({role: "master"}).select("avatar name phone _id description position ");
     res.json(masters);

@@ -90,5 +90,13 @@ const register = async (req, res, next) => {
   }
 };
 
+const logout = (req, res) => {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "Strict",
+  });
+  res.status(200).json({ message: "Выход выполнен успешно" });
+};
 
-module.exports = { register, login };
+module.exports = { register, login ,logout};

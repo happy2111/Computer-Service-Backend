@@ -1,13 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const { register, login } = require("../controllers/authController");
+const { register, login, logout} = require("../controllers/authController");
 const { generateAccessToken } = require("../utils/token");
 const User = require("../models/User");
 
 // Регистрация и логин
 router.post("/register", register);
 router.post("/login", login);
+router.post("/logout", logout)
 
 // Обновление access токена
 router.post("/refresh", async (req, res) => {
