@@ -1,19 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const mongoose = require("mongoose");
-const { createAgent } = require("forest-express-mongoose");
 const dotenv = require("dotenv");
 const fs = require("fs");
 const path = require("path");
-
-const User = require("./models/User");
-const Contact = require("./models/Contact");
 const { router: pushNotificationsRouter } = require('./routes/pushNotifications');
-
 const connectDB = require("./config/db");
-const authMiddleware = require("./middleware/authMiddleware");
-const authorizeRoles = require("./middleware/authorizeRoles");
 const errorHandler = require("./middleware/errorMiddleware");
 
 dotenv.config();
@@ -21,7 +13,6 @@ connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-// app.use(cors())
 app.use(cors({
   origin:  ['http://localhost:5173',"http://192.168.1.148:5173","https://servicehy.netlify.app", "https://www.applepark.uz", "https://applepark.uz"],
   methods: ['GET', 'POST', 'PUT','PATCH', 'DELETE', 'OPTIONS'],
@@ -36,14 +27,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
-// Forest Admin
-/*const agent = createAgent({
-  authSecret: process.env.FOREST_AUTH_SECRET,
-  envSecret: process.env.FOREST_ENV_SECRET,
-  isProduction: process.env.NODE_ENV === "production",
-  mongoose,
-});
-app.use(agent);*/
+
 
 // Роуты API
 const cookieParser = require("cookie-parser");
@@ -58,20 +42,6 @@ app.use('/api/push', pushNotificationsRouter);
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use("/api/masters", require("./routes/masters"));
 
-
-// Пример защищённого маршрута для пользователей с ролью 'user'
-app.get(
-  "/api/protected",
-  authMiddleware,
-  authorizeRoles("user"),
-  (req, res) => {
-    res.json({
-      msg: `Привет, пользователь с id: ${req.user.id} role: ${req.user.role}`,
-    });
-  }
-);
-
-// Обработчик ошибок
 app.use(errorHandler);
 
 app.listen(PORT, () => {

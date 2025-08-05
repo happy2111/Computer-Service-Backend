@@ -11,6 +11,8 @@ const DeviceSchema = new mongoose.Schema({
     enum: ["pending", "in-progress", "completed", "unrepairable"],
     default: "pending",
   },
+  images: {type: Array, default: []},
+  videos: {type: Array, default: []},
   imei : { type: String , default: undefined },
   cost : { type: Number },
   costOr : { type: Number },

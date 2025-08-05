@@ -6,6 +6,7 @@ const User = require("../models/User");
 const { sendPushNotifications } = require("./pushNotifications");
 const {sendTelegramMessage, formatDeviceStatus, formatMessage} = require("../utils/telegram");
 const mongoose = require("mongoose");
+const upload = require("../middleware/upload");
 
 
 router.post("/", authMiddleware, async (req, res) => {
@@ -30,7 +31,6 @@ router.post("/", authMiddleware, async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 })
-
 
 router.get("", authMiddleware, async (req, res) => {
   try {
@@ -143,6 +143,55 @@ router.put("/:deviceId/picked", authMiddleware, authorizeRoles("admin", "master"
     res.status(500).json({ error: error.message });
   }
 })
+
+
+
+router.patch("/:deviceId/images", upload.array("deviceFiles"), async (req, res, next) => {
+  try {
+    const { deviceId } = req.params;
+    const { userId } = req.query;
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "No files uploaded" });
+    }
+
+    // Separate files by mimetype
+    const imageFiles = [];
+    const videoFiles = [];
+
+    req.files.forEach((file) => {
+      // Пример: file.path = 'uploads/devices/videos/1722671838490-deviceFiles.mp4'
+      const relativePath = file.path.replace(/\\/g, "/"); // кроссплатформенно
+      const urlPath = `/${relativePath}`; // => /uploads/devices/videos/...
+
+      if (file.mimetype.startsWith("video/")) {
+        videoFiles.push(urlPath);
+      } else if (file.mimetype.startsWith("image/")) {
+        imageFiles.push(urlPath);
+      }
+    });
+
+
+    // Find user and device
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const device = user.device.id(deviceId);
+    if (!device) return res.status(404).json({ message: "Device not found" });
+
+    // Append files to arrays
+    device.images.push(...imageFiles);
+    device.videos.push(...videoFiles);
+
+    await user.save();
+
+    res.json({ message: "Files uploaded successfully", images: imageFiles, videos: videoFiles });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 
 router.patch("/:deviceId", authMiddleware, authorizeRoles("admin", "master"), async (req, res) => {
   try {
