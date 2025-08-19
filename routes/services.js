@@ -97,6 +97,27 @@ router.get("/:deviceId/status", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/:orderNumber", async (req, res) => {
+  try {
+    const orderNumber = parseInt(req.params.orderNumber, 10);
+
+    const user = await User.findOne(
+      { "device.orderNumber": orderNumber },
+      { "device.$": 1, name: 1 } // вернёт только совпавшее устройство
+    );
+
+    if (!user || !user.device || user.device.length === 0) {
+      return res.status(404).json({ message: "Service not found" });
+    }
+
+    const service = user.device[0];
+    res.json(service);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 router.put("/:deviceId/status", authMiddleware, authorizeRoles("admin", "master"), async (req, res) => {
   try {
     const allowedStatuses = ["pending", "in-progress", "completed", "unrepairable"];
@@ -144,8 +165,6 @@ router.put("/:deviceId/picked", authMiddleware, authorizeRoles("admin", "master"
   }
 })
 
-
-
 router.patch("/:deviceId/images", upload.array("deviceFiles"), async (req, res, next) => {
   try {
     const { deviceId } = req.params;
@@ -190,8 +209,6 @@ router.patch("/:deviceId/images", upload.array("deviceFiles"), async (req, res, 
     next(err);
   }
 });
-
-
 
 router.patch("/:deviceId", authMiddleware, authorizeRoles("admin", "master"), async (req, res) => {
   try {
