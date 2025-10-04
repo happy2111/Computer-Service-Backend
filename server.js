@@ -31,6 +31,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Роуты API
 const cookieParser = require("cookie-parser");
+const axios = require("axios");
 app.use(cookieParser());
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/user", require("./routes/user"));
@@ -44,6 +45,17 @@ app.use("/api/masters", require("./routes/masters"));
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server работает на порту \n\thttp://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", async () => {
+  try {
+    const { data: publicIP } = await axios.get("https://api.ipify.org?format=json");
+    console.log(`🚀 Server работает на:
+      Локально:  http://localhost:${PORT}
+      LAN:       http://192.168.1.148:${PORT}
+      Публичный: http://${publicIP.ip}:${PORT}`);
+  } catch (err) {
+    console.log(`🚀 Server работает на:
+      Локально:  http://localhost:${PORT}
+      LAN:       http://192.168.1.148:${PORT}
+      Публичный: [не удалось определить]`);
+  }
 });

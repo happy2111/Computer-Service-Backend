@@ -20,9 +20,17 @@ const userSchema = new mongoose.Schema(
     device: {
       type: [DeviceSchema],
       default: []
-    }
+    },
+    isStore: { type: Boolean, default: false },
+    bitoCustomerId: { type: String, default: "" },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+      default: "other" },
   },
   { timestamps: true }
 );
+
+
 
 module.exports = mongoose.model("User", userSchema);

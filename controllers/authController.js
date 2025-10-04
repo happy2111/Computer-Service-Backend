@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { registerSchema, loginSchema } = require("../validation");
 const CustomError = require("../utils/CustomError");
+const { createCustomer } = require("../services/bitoService");
 
 const { generateAccessToken, generateRefreshToken } = require("../utils/token");
 
@@ -23,9 +24,11 @@ const login = async (req, res, next) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return next(new CustomError("Parol noto‘g‘ri", 400));
 
+    // Генерация токенов
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
+    // Ответ
     res
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -41,6 +44,9 @@ const login = async (req, res, next) => {
           email: user.email,
           phone: user.phone,
           role: user.role,
+          isStore: user.isStore,
+          gender: user.gender,
+          bitoCustomerId: user.bitoCustomerId || "" // 🔹 всегда возвращаем, даже если пусто
         },
       });
   } catch (err) {
@@ -48,25 +54,53 @@ const login = async (req, res, next) => {
   }
 };
 
-
 const register = async (req, res, next) => {
   const { confirmPassword, ...dataToValidate } = req.body;
   const { error } = registerSchema.validate(dataToValidate);
   if (error) return next(new CustomError(error.details[0].message, 400));
-
-  const { name, email, phone, password, role } = dataToValidate;
+  let bitoCustomerId = "";
+  const { name, email, phone, password, role, gender, isStore} = dataToValidate;
   try {
+    console.log("📌 Проверяем email и phone в базе...");
     const existing = await User.findOne({ email });
     const existingPhone = await User.findOne({ phone });
     if (existing) return next(new CustomError("Email allaqachon mavjud", 400));
     if (existingPhone) return next(new CustomError("Telefon raqam allaqachon mavjud", 400));
-
+    if (isStore && !gender) {
+      throw new Error("Для магазинов поле gender обязательно!");
+    }
+    console.log("🔑 Хэшируем пароль...");
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, phone, password: hashedPassword, role });
+    if (isStore) {
+      console.log("🌐 Создаём кастомера в Bito...");
+      const bitoCustomer = await createCustomer({ name, gender });
+      bitoCustomerId = bitoCustomer._id; // сохраняем id
+      console.log("🆔 Bito Customer ID:", bitoCustomerId);
+    }
+    await User.updateMany(
+      {},
+      { $set: { gender: "other", bitoCustomerId: "", isStore: false } }
+    );
 
+    console.log("📝 Создаём пользователя в MongoDB...");
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password: hashedPassword,
+      role,
+      isStore,          // 🔹 сохраняем
+      gender,           // 🔹 сохраняем
+      bitoCustomerId,   // 🔹 сохраняем
+    });
+    console.log("✅ Пользователь создан:", user._id.toString());
+
+
+    console.log("🎟️ Генерируем токены...");
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
+    console.log("🍪 Отправляем ответ клиенту...");
     res
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -83,9 +117,15 @@ const register = async (req, res, next) => {
           email: user.email,
           phone: user.phone,
           role: user.role,
+          isStore: user.isStore,
+          gender: user.gender,
+          bitoCustomerId: bitoCustomerId
         },
       });
+
+    console.log("✅ Регистрация завершена успешно!");
   } catch (err) {
+    console.error("🔥 Ошибка в процессе регистрации:", err.message);
     next(err);
   }
 };
