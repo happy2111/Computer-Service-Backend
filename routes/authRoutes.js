@@ -66,25 +66,32 @@ router.post("/telegram/validate", async (req, res) => {
       return res.status(403).json({ message: "Invalid Telegram signature" });
     }
 
+    const fallbackName =
+      userData.first_name || userData.username || `tg_${userData.id}`;
     // Создаём/обновляем пользователя
     let user = await User.findOne({ telegram_id: userData.id });
     if (!user) {
+      const randomPassword = require("crypto").randomBytes(32).toString("hex");
+      const fallbackEmail = `tg_${userData.id}@applepark.uz`;
+
       user = await User.create({
-        telegram_id: userData.id,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        username: userData.username || null,
-        photo_url: userData.photo_url || null,
+        telegram_id: String(userData.id),
+
+        // обязательные поля вашей схемы:
+        name: fallbackName,
+        email: fallbackEmail,
+        password: randomPassword,
+
+        // дополнительные (если нужны):
+        avatar: userData.photo_url || undefined,
         role: "user",
       });
       console.log("👤 Created new user:", user._id);
     } else {
       // Можно обновить аватар/имя
       const updates = {
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        username: userData.username || user.username,
-        photo_url: userData.photo_url || user.photo_url,
+        name: fallbackName,
+        avatar: userData.photo_url || undefined,
       };
       await User.updateOne({ _id: user._id }, updates);
       console.log("🔁 Existing user updated:", user._id);
@@ -98,9 +105,7 @@ router.post("/telegram/validate", async (req, res) => {
       user: {
         id: String(user._id),
         telegram_id: user.telegram_id,
-        username: user.username,
-        first_name: user.first_name,
-        last_name: user.last_name,
+        name: user.name,
         photo_url: user.photo_url,
         role: user.role,
       },
