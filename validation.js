@@ -6,6 +6,8 @@ const registerSchema = Joi.object({
   phone: Joi.string().pattern(/^\+?[0-9]{10,15}$/).required(), // Regex for phone validation
   password: Joi.string().min(6).required(),
   role: Joi.string().valid("personal", "business", "admin").optional(),
+  gender: Joi.string().valid("male", "female").optional(),
+  isStore: Joi.boolean().optional(),
 });
 
 const loginSchema = Joi.object({

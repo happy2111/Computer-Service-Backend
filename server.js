@@ -13,12 +13,20 @@ connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-app.use(cors({
-  origin:  ['http://localhost:5173',"http://192.168.1.148:5173","https://servicehy.netlify.app", "https://www.applepark.uz", "https://applepark.uz"],
-  methods: ['GET', 'POST', 'PUT','PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
+if (process.env.NODE_ENV === 'development') {
+  app.use(cors({ origin: true, credentials: true }));
+} else {
+  app.use(cors({
+    origin: [
+      'https://applepark.uz',
+      'https://www.applepark.uz',
+      'https://servicehy.netlify.app',
+    ],
+    credentials: true,
+  }));
+}
+
+
 app.use(express.json());
 
 // Создаём папку uploads, если её нет
@@ -42,7 +50,12 @@ app.use("/api/dashboard", require("./routes/dash"));
 app.use('/api/push', pushNotificationsRouter);
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use("/api/masters", require("./routes/masters"));
+app.use("/api/cart", require("./routes/cartRoutes"));
 
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({status: "OK"});
+})
 app.use(errorHandler);
 
 app.listen(PORT, "0.0.0.0", async () => {

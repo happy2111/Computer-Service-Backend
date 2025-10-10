@@ -73,14 +73,11 @@ const register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     if (isStore) {
       console.log("🌐 Создаём кастомера в Bito...");
-      const bitoCustomer = await createCustomer({ name, gender });
-      bitoCustomerId = bitoCustomer._id; // сохраняем id
+      const bitoCustomer = await createCustomer({ name, gender, phone_number: phone });
+      bitoCustomerId = bitoCustomer?.data?._id; // сохраняем id
       console.log("🆔 Bito Customer ID:", bitoCustomerId);
     }
-    await User.updateMany(
-      {},
-      { $set: { gender: "other", bitoCustomerId: "", isStore: false } }
-    );
+
 
     console.log("📝 Создаём пользователя в MongoDB...");
     const user = await User.create({

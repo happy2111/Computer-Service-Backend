@@ -28,6 +28,7 @@ const createCustomer = async (user) => {
     gender: user.gender,
     status: "inactive",
     organization_ids: [BITO_ORGANIZATION_ID],
+    phone_number: user.phone_number,
   };
 
   console.log("👉 Отправляем данные в Bito:", body);
@@ -37,10 +38,28 @@ const createCustomer = async (user) => {
     console.log("✅ Успешный ответ от Bito:", data);
     return data;
   } catch (err) {
+    const status = err.response?.status || 500;
+    const bito = err.response?.data;
     console.error("❌ Ошибка при создании кастомера в Bito:");
-    console.error("Статус:", err.response?.status);
-    console.error("Ответ:", err.response?.data);
-    throw err;
+    console.error("Статус:", status);
+    console.error("Ответ:", bito);
+
+    // Нормализуем сообщение для фронта
+    if (status === 400 && bito) {
+      // Пример: у Bito есть messages.ru|uz|en и поле data (какое поле неверно)
+      const field = bito.data || "request";
+      const humanMessage =
+        bito.messages?.ru ||
+        bito.message ||
+        "Неверные данные для создания клиента";
+      // Пробрасываем как стандартную ошибку
+      throw new CustomError(`${humanMessage} (${field})`, 400);
+    }
+
+    // Прочие статусы — сконвертируем в CustomError с безопасным сообщением
+    const genericMsg =
+      "Не удалось создать клиента в Bito. Попробуйте позже.";
+    throw new CustomError(genericMsg, status >= 400 && status < 600 ? status : 500);
   }
 };
 
