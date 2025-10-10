@@ -68,11 +68,12 @@ router.post("/telegram/validate", async (req, res) => {
 
     const fallbackName =
       userData.first_name || userData.username || `tg_${userData.id}`;
+    const fallbackEmail = `tg_${userData.id}@applepark.uz`;
+
     // Создаём/обновляем пользователя
     let user = await User.findOne({ telegram_id: userData.id });
     if (!user) {
       const randomPassword = require("crypto").randomBytes(32).toString("hex");
-      const fallbackEmail = `tg_${userData.id}@applepark.uz`;
 
       user = await User.create({
         telegram_id: String(userData.id),
@@ -91,6 +92,7 @@ router.post("/telegram/validate", async (req, res) => {
       // Можно обновить аватар/имя
       const updates = {
         name: fallbackName,
+        email: fallbackEmail,
         avatar: userData.photo_url || undefined,
       };
       await User.updateOne({ _id: user._id }, updates);
@@ -105,6 +107,7 @@ router.post("/telegram/validate", async (req, res) => {
       user: {
         id: String(user._id),
         telegram_id: user.telegram_id,
+        email: user.email,
         name: user.name,
         photo_url: user.photo_url,
         role: user.role,
