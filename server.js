@@ -7,7 +7,7 @@ const path = require("path");
 const { router: pushNotificationsRouter } = require('./routes/pushNotifications');
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorMiddleware");
-
+const User = require("./models/User");
 dotenv.config();
 connectDB();
 
@@ -52,10 +52,15 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use("/api/masters", require("./routes/masters"));
 app.use("/api/cart", require("./routes/cartRoutes"));
 
-
-app.get("/api/health", (req, res) => {
-  res.status(200).json({status: "OK"});
-})
+app.get("/api/health", async (req, res) => {
+  try {
+    await User.updateMany({}, { $set: { telegram_id: null } });
+    res.status(200).json({ status: "OK" });
+  } catch (error) {
+    console.error("Update failed:", error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
+});
 app.use(errorHandler);
 
 app.listen(PORT, "0.0.0.0", async () => {

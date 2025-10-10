@@ -26,7 +26,9 @@ const userSchema = new mongoose.Schema(
     gender: {
       type: String,
       enum: ["male", "female", "other"],
-      default: "other" },
+      default: "other"
+    },
+    telegram_id: { type: String, default: null },
   },
   { timestamps: true }
 );

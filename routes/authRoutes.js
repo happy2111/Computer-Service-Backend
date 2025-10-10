@@ -56,22 +56,22 @@ router.post("/telegram/validate", async (req, res) => {
     }
 
     // ✅ Создаём или обновляем пользователя
-    // let user = await User.findOne({ telegram_id: userData.id });
-    // if (!user) {
-    //   user = await User.create({
-    //     telegram_id: userData.id,
-    //     first_name: userData.first_name,
-    //     username: userData.username,
-    //     photo_url: userData.photo_url,
-    //   });
-    //   console.log("👤 Created new user:", user._id);
-    // } else {
-    //   console.log("🔁 Existing user found:", user._id);
-    // }
+    let user = await User.findOne({ telegram_id: userData.id });
+    if (!user) {
+      user = await User.create({
+        telegram_id: userData.id,
+        first_name: userData.first_name,
+        username: userData.username,
+        photo_url: userData.photo_url,
+      });
+      console.log("👤 Created new user:", user._id);
+    } else {
+      console.log("🔁 Existing user found:", user._id);
+    }
 
     // ✅ Генерируем JWT токен
-    // const token = generateAccessToken({ _id: user._id, role: user.role });
-    console.log("🎟️ Generated JWT:", userData);
+    const token = generateAccessToken({ _id: user._id, role: user.role });
+    console.log("🎟️ Generated JWT:", token);
 
     return res.json({ token, user });
   } catch (err) {
