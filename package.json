@@ -68,6 +68,7 @@
     "jwa": "^1.4.2",
     "jws": "^3.2.2",
     "kareem": "^2.6.3",
+    "libphonenumber-js": "^1.12.24",
     "lodash.includes": "^4.3.0",
     "lodash.isboolean": "^3.0.3",
     "lodash.isinteger": "^4.0.4",

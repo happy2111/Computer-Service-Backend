@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema(
       default: "other"
     },
     telegram_id: { type: String, default: null },
+    phone_verified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
