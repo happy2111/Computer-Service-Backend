@@ -44,6 +44,7 @@ const login = async (req, res, next) => {
           email: user.email,
           phone: user.phone,
           role: user.role,
+          avatar: user.avatar || null,
           isStore: user.isStore,
           gender: user.gender,
           bitoCustomerId: user.bitoCustomerId || "" // 🔹 всегда возвращаем, даже если пусто
@@ -114,6 +115,7 @@ const register = async (req, res, next) => {
           email: user.email,
           phone: user.phone,
           role: user.role,
+          avatar: user.avatar || null, // ✅ Добавлено
           isStore: user.isStore,
           gender: user.gender,
           bitoCustomerId: bitoCustomerId

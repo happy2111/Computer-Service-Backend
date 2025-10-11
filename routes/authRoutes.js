@@ -70,52 +70,61 @@ router.post("/telegram/validate", async (req, res) => {
     const fallbackName =
       userData.first_name || userData.username || `tg_${userData.id}`;
     const fallbackEmail = `tg_${userData.id}@applepark.uz`;
+    const avatarUrl = userData.photo_url || null;
 
     // Создаём/обновляем пользователя
     let user = await User.findOne({ telegram_id: userData.id });
     let isNewUser = false;
+
     if (!user) {
       const randomPassword = require("crypto").randomBytes(32).toString("hex");
 
       user = await User.create({
         telegram_id: String(userData.id),
-
-        // обязательные поля вашей схемы:
         name: fallbackName,
         email: fallbackEmail,
         password: randomPassword,
-
-        // дополнительные (если нужны):
-        avatar: userData.photo_url || undefined,
+        avatar: avatarUrl,
         role: "user",
+        phone_verified: false,
       });
       console.log("👤 Created new user:", user._id);
+      console.log("🖼️ Avatar saved:", user.avatar);
       isNewUser = true;
     } else {
-      // Можно обновить аватар/имя
-      const updates = {
-        name: fallbackName,
-        email: fallbackEmail,
-        avatar: userData.photo_url || undefined,
-      };
-      await User.updateOne({ _id: user._id }, updates);
+      // ✅ ИСПРАВЛЕНИЕ: Используем findOneAndUpdate для получения обновлённых данных
+      user = await User.findOneAndUpdate(
+        { _id: user._id },
+        {
+          name: fallbackName,
+          email: fallbackEmail,
+          avatar: avatarUrl,
+        },
+        { new: true } // ✅ Важно! Возвращает обновлённый документ
+      );
       console.log("🔁 Existing user updated:", user._id);
+      console.log("🖼️ Avatar updated:", user.avatar);
     }
 
     const token = generateAccessToken({ _id: user._id, role: user.role });
     console.log("🎟️ Generated JWT for:", user._id);
 
+    // ✅ Формируем ответ с актуальными данными
+    const responseUser = {
+      id: String(user._id),
+      telegram_id: user.telegram_id,
+      email: user.email,
+      name: user.name,
+      avatar: user.avatar || null, // ✅ Используем данные из БД
+      role: user.role,
+    };
+
+    console.log("📤 Sending user data:", responseUser);
+
     return res.json({
       token,
       isNewUser,
-      user: {
-        id: String(user._id),
-        telegram_id: user.telegram_id,
-        email: user.email,
-        name: user.name,
-        photo_url: user.photo_url,
-        role: user.role,
-      },
+      user: responseUser,
     });
   } catch (err) {
     console.error("🔥 Telegram validate error:", err);
@@ -184,7 +193,7 @@ router.post("/logout", logout)
 
 router.post("/refresh", async (req, res) => {
   const token = req.cookies.refreshToken;
-  if (!token) return res.status(401).json({ msg: "Refresh token yo‘q" });
+  if (!token) return res.status(401).json({ msg: "Refresh token yo'q" });
 
   try {
     const payload = jwt.verify(token, process.env.REFRESH_SECRET);
@@ -203,6 +212,3 @@ router.post("/refresh", async (req, res) => {
 
 
 module.exports = router;
-
-
-
